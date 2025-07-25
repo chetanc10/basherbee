@@ -1,0 +1,100 @@
+#!/bin/bash
+
+script_name=$(basename $0)
+
+_usage()
+{
+	printf "Usage: $script_name <action> [args]
+
+<action>    : Mandatory; basherbee actions as explained below.
+  help      - display this help message and return
+  install   - install basherbee-enabled package. [args] same as in 'basher install'
+              Does bash-install first and then does basherbee setup (pkg-cd-alias recreation, pkg-config and sourcing basherbee-rc)
+  upgrade   - upgrade basherbee-installed package. [args] same as in 'basher upgrade'
+              Does bash-update first and then redoes basherbee setup (pkg-cd-alias recreation, pkg-config and sourcing basherbee-rc)
+  uninstall - uninstall basherbee-installed package. [args] same as in 'basher uninstall'
+              Removes basherbee setup (pkg-cd-alias and basherbee-rc-sourcing) and then bash-uninstall package
+
+"
+	exit $1
+}
+
+[ $# -lt 1 ] && _usage 0
+
+_basherbee_src_rc()
+{
+	local rc="${@}"/basherbee-rc
+	[ ! -f "$rc" ] && return
+	grep -Fq "$rc" ~/.basherbee_src-rc 2>/dev/null || echo ". $rc" >> ~/.basherbee_src-rc
+}
+
+basherbee-install()
+{
+	# basher-install the package
+	local logf=/tmp/basherbee-${user_repo}.log
+	set -o pipefail
+	(basher install "${@}" 2>&1 | tee ${logf}) || exit $?
+	set +o pipefail
+	local pkg_dir="$(grep -F "Cloning into" ${logf} | awk -F"'" '{print $2}')"
+	if [ ! -d  "$pkg_dir" ]; then
+		[ -z "$(grep 'already\ exists' ${logf})" ] && echo "$pkg_dir: Invalid directory. Something went wrong!" && exit 2
+		exit 0
+	fi
+	pkg_dir=~/.basher/cellar/packages/"${@}"
+
+	# Handle basherbee.config
+	[ -x ./basherbee.config ] && ./basherbee.config
+
+	# Handle basherbee-rc
+	_basherbee_src_rc "$pkg_dir"
+
+	# Setup pkg-cd-alias
+	grep -Fq "$pkg_dir" ~/.basherbee_aliases || echo "alias cd2$(basename $pkg_dir)=\"cd $pkg_dir\"" >> ~/.basherbee_aliases
+}
+
+basherbee-upgrade()
+{
+	# basher-upgrade the package
+	local logf=/tmp/basherbee-${user_repo}.log
+	set -o pipefail
+	(basher upgrade "${@}" 2>&1 | tee ${logf}) || exit $?
+	set +o pipefail
+	grep -Fq "Already up to date" ${logf} && return 0
+	local pkg_dir=~/.basher/cellar/packages/"${@}"
+
+	# Handle basherbee.config
+	[ -x ./basherbee.config ] && ./basherbee.config
+
+	# Handle basherbee-rc
+	_basherbee_src_rc "$pkg_dir"
+}
+
+basherbee-uninstall()
+{
+	local pkg_dir=~/.basher/cellar/packages/"${@}"
+
+	# Remove package-cd-alias
+	sed -i "/alias cd2$(basename $pkg_dir)/d" ~/.basherbee_aliases
+
+	# Remove package basherbee-rc sourcing
+	local epath="$(printf '%s\n' "$pkg_dir/basherbee-rc" | sed 's/\//\\\//g')"
+	sed -i "/${epath}/d" ~/.basherbee_src-rc
+
+	# basher-uninstall the package
+	basher uninstall "${@}"
+}
+
+case "$1" in
+	install|upgrade|uninstall) op=$1 ; shift ;;
+	*) _usage 1 ;;
+esac
+
+user_repo=""
+for arg in "${@}"; do
+	[[ $arg == -* ]] && continue
+	[[ $arg =~ ^([^/]+)/([^/]+)$ ]] && user_repo="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}" && break
+done
+
+basherbee-$op "${@}"
+
+exit 0
