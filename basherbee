@@ -43,13 +43,13 @@ basherbee-install()
 	pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Handle basherbee.config
-	[ -x ./basherbee.config ] && ./basherbee.config
+	[ -x ${pkg_dir}/basherbee.config ] && ${pkg_dir}/basherbee.config
 
 	# Handle basherbee-rc
 	_basherbee_src_rc "$pkg_dir"
 
 	# Setup pkg-cd-alias
-	grep -Fq "$pkg_dir" ~/.basherbee_aliases || echo "alias cd2$(basename $pkg_dir)=\"cd $pkg_dir\"" >> ~/.basherbee_aliases
+	grep -Fq "$(basename $pkg_dir)" ~/.basherbee_aliases || echo "alias cd2$(basename $pkg_dir)=\"cd $pkg_dir\"" >> ~/.basherbee_aliases
 }
 
 basherbee-upgrade()
@@ -63,7 +63,7 @@ basherbee-upgrade()
 	local pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Handle basherbee.config
-	[ -x ./basherbee.config ] && ./basherbee.config
+	[ -x ${pkg_dir}/basherbee.config ] && ${pkg_dir}/basherbee.config
 
 	# Handle basherbee-rc
 	_basherbee_src_rc "$pkg_dir"
