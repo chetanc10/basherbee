@@ -16,14 +16,15 @@ Install basher by referring to https://github.com/basherpm/basher/blob/master/RE
 ## Install basherbee
 ```basher install chetanc10/basherbee```  
 After installing basherbee using basher, run this command to setup basherbee hooks into bash environment
-```${HOME}/.basher/cellar/packages/basherbee/install.sh```
+```${HOME}/.basher/cellar/packages/chetanc10/basherbee/install.sh```
 ### Uninstall basherbee
 Uninstalling basherbee will additionally remove basherbee-related setup like basherbee-rc sourcing and Package-cd-aliasing for basherbee packages.
-```${HOME}/.basher/cellar/packages/basherbee/uninstall.sh```
+```${HOME}/.basher/cellar/packages/chetanc10/basherbee/uninstall.sh```
+```basher uninstall chetanc10/basherbee```  
 
 # Package Installations
 ```basherbee install user1/pkg2```  
-This does ```basher install given user1/pkg2``` first, and then setup using DPKG, basherbee.config, basherbee-rc sourcing and Package-cd-aliasing.
+This does ```basher install given user1/pkg2``` first, and then setup using basherbee.config, basherbee-rc sourcing and Package-cd-aliasing.
 
 # Package Uninstallations
 ```basherbee uninstall user1/pkg2```
@@ -31,10 +32,12 @@ This does basherbee-rc-source disabling and removing Package-cd-alias first and 
 
 # Package Upgrades
 ```basherbee upgrade user1/pkg2```
-This does ```basher upgrade user1/pkg2``` first, and then setup using DPKG, basherbee.config and basherbee-rc sourcing.
+This does ```basher upgrade user1/pkg2``` first, and then setup using basherbee.config and basherbee-rc sourcing.
 
 # basherbee files
 ## basherbee.config
 This is a bash script file that can do any or all of the operations as below:  
-- install DPKG dependencies - apt-get installs bash utilities/tools that the package depends on
+- install dpkg dependencies - apt-get installs bash utilities/tools that the package depends on
 - one time setup - allows user to configure behavior of the scripts/executables provided by the package
+## basherbee-rc
+This is a bash script file to be sourced in bash to setup package specific variables, aliases, etc.
