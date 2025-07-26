@@ -14,7 +14,8 @@ _usage()
               Does bash-update first and then redoes basherbee setup (pkg-cd-alias recreation, pkg-config and sourcing basherbee-rc)
   uninstall - uninstall basherbee-installed package. [args] same as in 'basher uninstall'
               Removes basherbee setup (pkg-cd-alias and basherbee-rc-sourcing) and then bash-uninstall package
-
+NOTE: package-cd-alias is created as cd2<pkg-name>
+      e.g. user1/pkg2 will get an alias cd2pkg2
 "
 	exit $1
 }

@@ -7,7 +7,7 @@ Basherbee is a Linux-only bash utility, wrapping basher but adding a few feature
 | Package Upgrade        | ```basher help upgrade```    | ```basherbee help upgrade```<br>(basher plus extra features)                  |
 | basherbee.config       | Bash script file unsupported | Runs during pkg installation to let user configure pkg features               |
 | basherbee-rc           | Bash script file unsupported | If present in pkg-root dir, add to bash using 'source ${PKG_DIR}/basherbee-rc'|
-| cd-package Alias Setup | Unsupported                  | Sets up a cd alias for each package                                           |
+| cd-package Alias Setup | Unsupported                  | Sets up cd alias per package (all such aliases are prefixed with cd2)         |
 
 
 # basherbee setup
