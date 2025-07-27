@@ -44,7 +44,7 @@ basherbee-install()
 	pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Handle basherbee.config
-	[ -x ${pkg_dir}/basherbee.config ] && ${pkg_dir}/basherbee.config
+	[ -f ${pkg_dir}/basherbee.config ] && bash ${pkg_dir}/basherbee.config
 
 	# Handle basherbee-rc
 	_basherbee_src_rc "$pkg_dir"
@@ -64,7 +64,7 @@ basherbee-upgrade()
 	local pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Handle basherbee.config
-	[ -x ${pkg_dir}/basherbee.config ] && ${pkg_dir}/basherbee.config
+	[ -f ${pkg_dir}/basherbee.config ] && bash ${pkg_dir}/basherbee.config
 
 	# Handle basherbee-rc
 	_basherbee_src_rc "$pkg_dir"
