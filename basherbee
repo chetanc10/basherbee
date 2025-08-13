@@ -9,13 +9,11 @@ _usage()
 <action>    : Mandatory; basherbee actions as explained below.
   help      - display this help message and return
   install   - install basherbee-enabled package. [args] same as in 'basher install'
-              Does bash-install first and then does basherbee setup (pkg-cd-alias recreation, pkg-config and sourcing basherbee-rc)
+              Does bash-install first and then does basherbee setup (pkg-config and sourcing basherbee-rc)
   upgrade   - upgrade basherbee-installed package. [args] same as in 'basher upgrade'
-              Does bash-update first and then redoes basherbee setup (pkg-cd-alias recreation, pkg-config and sourcing basherbee-rc)
+              Does bash-update first and then redoes basherbee setup (pkg-config and sourcing basherbee-rc)
   uninstall - uninstall basherbee-installed package. [args] same as in 'basher uninstall'
-              Removes basherbee setup (pkg-cd-alias and basherbee-rc-sourcing) and then bash-uninstall package
-NOTE: package-cd-alias is created as cd2<pkg-name>
-      e.g. user1/pkg2 will get an alias cd2pkg2
+              Removes basherbee setup (basherbee-rc-sourcing) and then bash-uninstall package
 "
 	exit $1
 }
@@ -49,8 +47,7 @@ basherbee-install()
 	# Handle basherbee-rc
 	_basherbee_src_rc "$pkg_dir"
 
-	# Setup pkg-cd-alias
-	grep -Fq "$(basename $pkg_dir)" ~/.basherbee_aliases || echo "alias cd2$(basename $pkg_dir)=\"cd $pkg_dir\"" >> ~/.basherbee_aliases
+	return 0
 }
 
 basherbee-upgrade()
@@ -73,9 +70,6 @@ basherbee-upgrade()
 basherbee-uninstall()
 {
 	local pkg_dir=~/.basher/cellar/packages/"${@}"
-
-	# Remove package-cd-alias
-	sed -i "/alias cd2$(basename $pkg_dir)/d" ~/.basherbee_aliases
 
 	# Remove package basherbee-rc sourcing
 	local epath="$(printf '%s\n' "$pkg_dir/basherbee-rc" | sed 's/\//\\\//g')"

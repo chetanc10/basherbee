@@ -7,7 +7,6 @@ Basherbee is a Linux-only bash utility, wrapping basher but adding a few feature
 | Package Upgrade        | ```basher help upgrade```    | ```basherbee help upgrade```<br>(basher plus extra features)                  |
 | basherbee.config       | Bash script file unsupported | Runs during pkg installation to let user configure pkg features               |
 | basherbee-rc           | Bash script file unsupported | If present in pkg-root dir, add to bash using 'source ${PKG_DIR}/basherbee-rc'|
-| cd-package Alias Setup | Unsupported                  | Sets up cd alias per package (all such aliases are prefixed with cd2)         |
 
 
 # basherbee setup
@@ -18,17 +17,17 @@ Install basher by referring to https://github.com/basherpm/basher/blob/master/RE
 After installing basherbee using basher, run this command to setup basherbee hooks into bash environment
 ```${HOME}/.basher/cellar/packages/chetanc10/basherbee/install.sh```
 ### Uninstall basherbee
-Uninstalling basherbee will additionally remove basherbee-related setup like basherbee-rc sourcing and Package-cd-aliasing for basherbee packages.
+Uninstalling basherbee will additionally remove basherbee-related setup like basherbee-rc sourcing for basherbee packages.
 ```${HOME}/.basher/cellar/packages/chetanc10/basherbee/uninstall.sh```
 ```basher uninstall chetanc10/basherbee```  
 
 # Package Installations
 ```basherbee install user1/pkg2```  
-This does ```basher install given user1/pkg2``` first, and then setup using basherbee.config, basherbee-rc sourcing and Package-cd-aliasing.
+This does ```basher install given user1/pkg2``` first, and then setup using basherbee.config and basherbee-rc sourcing.
 
 # Package Uninstallations
 ```basherbee uninstall user1/pkg2```
-This does basherbee-rc-source disabling and removing Package-cd-alias first and then ```basher uninstall user1/pkg2```.
+This does basherbee-rc-source disabling first and then ```basher uninstall user1/pkg2```.
 
 # Package Upgrades
 ```basherbee upgrade user1/pkg2```
