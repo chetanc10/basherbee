@@ -23,8 +23,12 @@ _usage()
 _basherbee_src_rc()
 {
 	local rc="${@}"/basherbee-rc
-	[ ! -f "$rc" ] && return
-	grep -Fq "$rc" ~/.basherbee_src-rc 2>/dev/null || echo ". $rc" >> ~/.basherbee_src-rc
+	[ ! -f "$rc" ] && return 0
+	grep -Fq "#$rc" ~/.gbasherbee-rc 2>/dev/null && return 0
+	echo "#$rc" >> ~/.gbasherbee-rc
+	cat "$rc" >> ~/.gbasherbee-rc
+	echo "###$rc" >> ~/.gbasherbee-rc
+	return 0
 }
 
 basherbee-install()
@@ -72,8 +76,8 @@ basherbee-uninstall()
 	local pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Remove package basherbee-rc sourcing
-	local epath="$(printf '%s\n' "$pkg_dir/basherbee-rc" | sed 's/\//\\\//g')"
-	sed -i "/${epath}/d" ~/.basherbee_src-rc
+	local epath="$(printf '%s' "$pkg_dir/basherbee-rc" | sed sed 's/[\/&]/\\&/g')"
+	sed -i "/#${epath}/,/##${epath}/d" ~/.gbasherbee-rc
 
 	# basher-uninstall the package
 	basher uninstall "${@}"
