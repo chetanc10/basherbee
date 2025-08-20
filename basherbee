@@ -31,6 +31,16 @@ _basherbee_src_rc()
 	return 0
 }
 
+_basherbee_config()
+{
+	local pkg_dir="${@}"
+	[ ! -f "$pkg_dir"/basherbee.config ] && return 0
+	cd "$pkg_dir"
+	bash basherbee.config
+	cd -
+	return 0
+}
+
 basherbee-install()
 {
 	# basher-install the package
@@ -46,7 +56,7 @@ basherbee-install()
 	pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Handle basherbee.config
-	[ -f ${pkg_dir}/basherbee.config ] && bash ${pkg_dir}/basherbee.config
+	_basherbee_config "$pkg_dir"
 
 	# Handle basherbee-rc
 	_basherbee_src_rc "$pkg_dir"
@@ -65,7 +75,7 @@ basherbee-upgrade()
 	local pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Handle basherbee.config
-	[ -f ${pkg_dir}/basherbee.config ] && bash ${pkg_dir}/basherbee.config
+	_basherbee_config "$pkg_dir"
 
 	# Handle basherbee-rc
 	_basherbee_src_rc "$pkg_dir"
@@ -76,7 +86,7 @@ basherbee-uninstall()
 	local pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Remove package basherbee-rc sourcing
-	local epath="$(printf '%s' "$pkg_dir/basherbee-rc" | sed sed 's/[\/&]/\\&/g')"
+	local epath="$(printf '%s' "$pkg_dir/basherbee-rc" | sed 's/[\/&]/\\&/g')"
 	sed -i "/#${epath}/,/##${epath}/d" ~/.gbasherbee-rc
 
 	# basher-uninstall the package
