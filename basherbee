@@ -23,11 +23,15 @@ _usage()
 _basherbee_src_rc()
 {
 	local rc="${@}"/basherbee-rc
+	local grc=~/.gbasherbee-rc
 	[ ! -f "$rc" ] && return 0
-	grep -Fq "#$rc" ~/.gbasherbee-rc 2>/dev/null && return 0
-	echo "#$rc" >> ~/.gbasherbee-rc
-	cat "$rc" >> ~/.gbasherbee-rc
-	echo "###$rc" >> ~/.gbasherbee-rc
+	local old_pattern=$(basename ${@})
+	local new_pattern=$(basename ${@})-$(crc32 $rc)
+	grep -Fq "#${new_pattern}" $grc 2>/dev/null && return 0
+	grep -Fq "#${old_pattern}" $grc 2>/dev/null && sed -i "s/${old_pattern}/d" $grc #TODO
+	echo "#${new_pattern}" >> $grc
+	cat "$rc" >> $grc
+	echo "###${new_pattern}" >> $grc
 	return 0
 }
 
@@ -44,14 +48,13 @@ _basherbee_config()
 basherbee-install()
 {
 	# basher-install the package
-	local logf=/tmp/basherbee-${user_repo}.log
 	set -o pipefail
-	(basher install "${@}" 2>&1 | tee ${logf}) || exit $?
+	(basher install "${@}" 2>&1 | tee ${logf}) || return $?
 	set +o pipefail
 	local pkg_dir="$(grep -F "Cloning into" ${logf} | awk -F"'" '{print $2}')"
 	if [ ! -d  "$pkg_dir" ]; then
-		[ -z "$(grep 'already\ exists' ${logf})" ] && echo "$pkg_dir: Invalid directory. Something went wrong!" && exit 2
-		exit 0
+		[ -z "$(grep 'already\ exists' ${logf})" ] && echo "$pkg_dir: Invalid directory. Something went wrong!" && return 2
+		return 0
 	fi
 	pkg_dir=~/.basher/cellar/packages/"${@}"
 
@@ -67,11 +70,10 @@ basherbee-install()
 basherbee-upgrade()
 {
 	# basher-upgrade the package
-	local logf=/tmp/basherbee-${user_repo}.log
 	set -o pipefail
-	(basher upgrade "${@}" 2>&1 | tee ${logf}) || exit $?
+	(basher upgrade "${@}" 2>&1 | tee ${logf}) || return $?
 	set +o pipefail
-	grep -Fq "Already up to date" ${logf} && return 0
+
 	local pkg_dir=~/.basher/cellar/packages/"${@}"
 
 	# Handle basherbee.config
@@ -104,6 +106,9 @@ for arg in "${@}"; do
 	[[ $arg =~ ^([^/]+)/([^/]+)$ ]] && user_repo="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}" && break
 done
 
+logf=/tmp/basherbee-${user_repo}.log
 basherbee-$op "${@}"
+st=$?
+rm -rf ${logf}
 
-exit 0
+exit $st
