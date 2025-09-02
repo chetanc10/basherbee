@@ -1,10 +1,11 @@
 #!/bin/bash
 
 if [ ! -d ${HOME}/.basher/cellar/packages/chetanc10/basherbee ]; then
-	echo "ERROR: basherbee is not installed using basher!"
-	echo "       Please install basherbee using basher: basher install chetanc10/basher"
+	echo "Please install basherbee using basher: basher install chetanc10/basher"
 	exit -1
 fi
+
+sudo apt-get install libarchive-zip-perl -y || exit -1
 
 bee_dir="${HOME}/.basher/cellar/packages/chetanc10/basherbee"
 
