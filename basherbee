@@ -10,8 +10,9 @@ _usage()
   help      - display this help message and return
   install   - install basherbee-enabled package. [args] same as in 'basher install'
               Does bash-install first and then does basherbee setup (pkg-config and sourcing basherbee-rc)
-  upgrade   - upgrade basherbee-installed package. [args] same as in 'basher upgrade'
-              Does bash-update first and then redoes basherbee setup (pkg-config and sourcing basherbee-rc)
+  upgrade [all] - Without 'all', upgrade basherbee-installed package. [args] same as in 'basher upgrade',
+                    does bash-update first and then redoes basherbee setup (pkg-config and sourcing basherbee-rc)
+                  With 'all', does an upgrade of every basherbee package installed already in the system
   uninstall - uninstall basherbee-installed package. [args] same as in 'basher uninstall'
               Removes basherbee setup (basherbee-rc-sourcing) and then bash-uninstall package
 "
@@ -69,18 +70,29 @@ basherbee-install()
 
 basherbee-upgrade()
 {
-	# basher-upgrade the package
-	set -o pipefail
-	(basher upgrade "${@}" 2>&1 | tee ${logf}) || return $?
-	set +o pipefail
+	_basher_upgrade () {
+		# basher-upgrade the package
+		set -o pipefail
+		(basher upgrade "${@}" 2>&1 | tee ${logf}) || return $?
+		set +o pipefail
+		local pkg_dir=~/.basher/cellar/packages/"${@}"
+		_basherbee_config "$pkg_dir"
+		_basherbee_src_rc "$pkg_dir"
+		return 0
+	}
 
-	local pkg_dir=~/.basher/cellar/packages/"${@}"
+	if [ "${@}" != "all" ]; then
+		_basher_upgrade "${@}"
+		return $?
+	fi
 
-	# Handle basherbee.config
-	_basherbee_config "$pkg_dir"
+	local pkgs
+	mapfile -t pkgs < <(basher list)
+	for pkg in ${pkgs[*]}; do
+		_basher_upgrade "$pkg"
+	done
 
-	# Handle basherbee-rc
-	_basherbee_src_rc "$pkg_dir"
+	return 0
 }
 
 basherbee-uninstall()
