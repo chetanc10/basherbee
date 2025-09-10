@@ -24,12 +24,14 @@ _usage()
 _basherbee_src_rc()
 {
 	local rc="${@}"/basherbee-rc
-	local grc=~/.gbasherbee-rc
 	[ ! -f "$rc" ] && return 0
+	local grc=~/.gbasherbee-rc
 	local old_pattern=$(basename ${@})
-	local new_pattern=$(basename ${@})-$(crc32 $rc)
+	cd "${@}"
+	local new_pattern=$(basename ${@})-$(git log --pretty=oneline --abbrev-commit | head -n1 | awk '{print $1}')
+	cd - >/dev/null
 	grep -Fq "#${new_pattern}" $grc 2>/dev/null && return 0
-	grep -Fq "#${old_pattern}" $grc 2>/dev/null && sed -i "s/${old_pattern}/d" $grc #TODO
+	sed -i "/^#${old_pattern}/,/###${old_pattern}/d" $grc
 	echo "#${new_pattern}" >> $grc
 	cat "$rc" >> $grc
 	echo "###${new_pattern}" >> $grc
@@ -42,7 +44,7 @@ _basherbee_config()
 	[ ! -f "$pkg_dir"/basherbee.config ] && return 0
 	cd "$pkg_dir"
 	bash basherbee.config
-	cd -
+	cd - >/dev/null
 	return 0
 }
 
